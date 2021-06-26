@@ -5,6 +5,9 @@ def format() -> None:
     check_call(["isort", "."], )
     check_call(["yapf", "-i", "-r", "--style=style.yapf", "./"], )
 
+def generate_setup_py() -> None:
+    f = open("setup.py", "w")
+    check_call(["poetry2setup"],stdout=f)
 
 def reformat() -> None:
     check_call(["black", "src/", "tests/"])

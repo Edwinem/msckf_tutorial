@@ -9,7 +9,8 @@ from viewer import *
 
 
 @click.command()
-@click.option('--euroc_gt_data_file', required=True,help="Path to the ground truth data file of a Euroc dataset")
+@click.option('--euroc_gt_data_file', required=True,help="Path to the ground truth data file of a Euroc dataset."
+                                                         " Should look like state_groundtruth_estimate0/data.csv ")
 def run_viewer_example(euroc_gt_data_file):
 
     assert(os.path.exists(euroc_gt_data_file))

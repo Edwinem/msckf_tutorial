@@ -22,8 +22,14 @@ isort = "^5.9.1"
 poetry2setup = "^1.0.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+# We need to disable setuptools 50 as it breaks our setup.py install
+requires = [
+    "setuptools!=50.0",
+    "wheel",
+    "poetry-core>=1.0.0"
+]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 format = "scripts.scripts:format"
+generate_setup_py = "scripts.scripts:generate_setup_py"

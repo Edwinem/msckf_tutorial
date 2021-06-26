@@ -64,7 +64,7 @@ def run_on_euroc(euroc_folder, start_timestamp, use_viewer):
     time_syncer.add_timestamp_stream("camera", camera_timestamps)
     time_syncer.add_timestamp_stream("imu", imu_timestamps)
     time_syncer.add_timestamp_stream("gt", ground_truth_timestamps)
-    time_syncer.set_start_timestamp(1403636896901666560)
+    time_syncer.set_start_timestamp(int(start_timestamp))
     imu_buffer = []
     last_imu_timestamp = -1
     first_time = True
