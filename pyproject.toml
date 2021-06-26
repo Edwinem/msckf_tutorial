@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "msckf_tutorial"
+version = "0.1.0"
+description = ""
+authors = ["Edwinem <735010+Edwinem@users.noreply.github.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.10"
+numpy = "^1.21.0"
+scipy = "^1.7.0"
+moderngl-window = "^2.4.0"
+pyrr = "^0.10.3"
+click = "^8.0.1"
+transforms3d = "^0.3.1"
+opencv-python = "^4.5.2"
+moderngl = "^5.6.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+yapf = "^0.31.0"
+isort = "^5.9.1"
+poetry2setup = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+format = "scripts.scripts:format"
