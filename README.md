@@ -45,7 +45,7 @@ This assumes you already have a basic understanding of rotations, and transforms
 
 ### Basic homogenous transforms.
 
-![Coordinate Systems](docs/drawio_diagrams/images/Coordinate systems-3 coordinate systems.png "Two Coordinate Systems")
+![Coordinate Systems](docs/drawio_diagrams/images/Coordinate_systems-3_coordinate_systems.png "Two Coordinate Systems")
 
 In the above image you can see 3 coordinate system which we will call Frame **A** and Frame **B** and **O**(for origin).
 They are related to each other by a rigid body transform(![formula](https://render.githubusercontent.com/render/math?math=T)). Which is composed of a rotation 

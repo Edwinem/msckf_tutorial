@@ -38,11 +38,8 @@ scripts/\.vs/scripts/v15/\.suo
 
 
 #Other filetypes
-*.xml
 *.iml
 *.orig
-*.jpg
-*.png
 *.autosave
 *.zip
 *.dir
