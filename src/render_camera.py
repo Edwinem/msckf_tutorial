@@ -344,7 +344,7 @@ class CameraWindow(WindowConfig):
         super().__init__(**kwargs)
         self.camera = CameraHandler(self.wnd.keys, aspect_ratio=self.wnd.aspect_ratio)
         # Good starting position for Euroc dataset
-        self.camera.set_position(0,0,12)
+        self.camera.set_position(0, 0, 12)
         self.camera_enabled = True
 
     def key_event(self, key, action, modifiers):

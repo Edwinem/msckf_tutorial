@@ -7,12 +7,8 @@ from dataclasses import dataclass
 
 import click
 import cv2
-import numpy as np
-
-
-import logging
-
 import matplotlib.pyplot as plt
+import numpy as np
 import PyVIOSIM
 
 from feature_tracker import FeatureTracker

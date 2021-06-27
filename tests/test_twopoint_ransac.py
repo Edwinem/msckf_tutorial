@@ -2,8 +2,8 @@ import numpy as np
 from transforms3d.euler import euler2mat
 
 from feature_tracker import (compute_algebraic_error, compute_two_point_translation, run_two_pt_ransac)
-from spatial_transformations import JPLPose, JPLQuaternion, skew_matrix
-from tests.utilities import *
+from math_utilities import skew_matrix
+from tests.utilities import (compute_3x4_mat, compute_relative_rot12, compute_relative_trans12, project_point)
 
 
 def create_essential(rot, trans):

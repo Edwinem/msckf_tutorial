@@ -3,7 +3,7 @@ from transforms3d.euler import euler2mat
 
 from msckf import *
 from msckf_types import CameraCalibration, IMUData, PinholeIntrinsics
-from params import Config, EurocDatasetCalibrationParams
+from params import AlgorithmConfig, EurocDatasetCalibrationParams
 from spatial_transformations import hamiltonian_quaternion_to_rot_matrix
 from tests.utilities import project_point
 
@@ -21,56 +21,55 @@ def setup_euroc_calibration():
 def setup_msckf():
     camera_calib = setup_euroc_calibration()
 
-    msckf = MSCKF(Config.msckf_params, camera_calib)
+    msckf = MSCKF(AlgorithmConfig.msckf_params, camera_calib)
     msckf.set_imu_noise(0.0, 0.0, 0.0, 0.0)
     zero3 = np.zeros((3, ))
     msckf.initialize(np.eye(3), zero3, zero3, zero3, zero3)
     return msckf
 
 
-# def test_msckf_imu_integration():
-#
-#     msckf = setup_msckf()
-#
-#     # Constant linear acceleration
-#
-#     linear_acceleration = 0.3
-#     gravity = 9.81
-#
-#     acc_measurement = np.array([linear_acceleration,0,gravity])
-#     gyro_meas =  np.zeros((3,))
-#
-#     dt = 1.0
-#
-#     data = IMUData(acc_measurement,gyro_meas,0,dt)
-#
-#
-#     imu_buffer = []
-#     imu_buffer.append(data)
-#
-#     msckf.propogate(imu_buffer)
-#
-#     expected_translation_x = linear_acceleration * dt**2/2
-#     expected_velocity_x = linear_acceleration * dt
-#
-#     expected_translation = np.array([expected_translation_x,0,0])
-#     expected_velocity = np.array([expected_velocity_x,0,0])
-#
-#     assert (np.allclose(expected_translation,msckf.state.global_t_imu))
-#     assert(np.allclose(expected_velocity,msckf.state.velocity))
-#
-#     # Orientation should not change as no gyro measurement
-#     assert(np.allclose(np.array([0,0,0,1.0]),msckf.state.imu_JPLQ_global.q))
-#
-#     msckf = setup_msckf()
-#
-#     imu_buffer.append(data)
-#
-#     msckf.propogate(imu_buffer)
-#
-#     new_x = expected_translation_x + expected_velocity_x*dt + linear_acceleration*dt**2/2
-#
-#     assert (np.allclose(np.array([new_x,0,0]), msckf.state.global_t_imu))
+def test_msckf_imu_integration():
+
+    msckf = setup_msckf()
+
+    # Constant linear acceleration
+
+    linear_acceleration = 0.3
+    gravity = 9.81
+
+    acc_measurement = np.array([linear_acceleration, 0, gravity])
+    gyro_meas = np.zeros((3, ))
+
+    dt = 1.0
+
+    data = IMUData(acc_measurement, gyro_meas, 0, dt)
+
+    imu_buffer = []
+    imu_buffer.append(data)
+
+    msckf.propogate(imu_buffer)
+
+    expected_translation_x = linear_acceleration * dt**2 / 2
+    expected_velocity_x = linear_acceleration * dt
+
+    expected_translation = np.array([expected_translation_x, 0, 0])
+    expected_velocity = np.array([expected_velocity_x, 0, 0])
+
+    assert (np.allclose(expected_translation, msckf.state.global_t_imu))
+    assert (np.allclose(expected_velocity, msckf.state.velocity))
+
+    # Orientation should not change as no gyro measurement
+    assert (np.allclose(np.array([0, 0, 0, 1.0]), msckf.state.imu_JPLQ_global.q))
+
+    msckf = setup_msckf()
+
+    imu_buffer.append(data)
+
+    msckf.propogate(imu_buffer)
+
+    new_x = expected_translation_x + expected_velocity_x * dt + linear_acceleration * dt**2 / 2
+
+    assert (np.allclose(np.array([new_x, 0, 0]), msckf.state.global_t_imu))
 
 
 def test_constant_angular_velocity():

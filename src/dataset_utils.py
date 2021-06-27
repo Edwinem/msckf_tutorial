@@ -1,6 +1,7 @@
 import csv
 import sys
 from dataclasses import dataclass
+
 import numpy as np
 
 
@@ -37,7 +38,7 @@ class TimeStampStreamInfo():
 
 
 class TimestampIndex():
-    def __init__(self,timestamp,index):
+    def __init__(self, timestamp, index):
         self.timestamp = timestamp
         self.index = index
 
@@ -138,7 +139,7 @@ class TimestampSynchronizer():
                 continue
             timestamp = stream[cur_index]
             if abs(timestamp - min_timestamp) <= self.max_dt_between_timestamps:
-                output_data[data_name] = TimestampIndex(timestamp,cur_index + value.offset)
+                output_data[data_name] = TimestampIndex(timestamp, cur_index + value.offset)
                 value.cur_index += 1
         return output_data
 

@@ -40,10 +40,8 @@ class ViewerConfig():
 
 
 class AlgorithmConfig():
-
     @dataclass
     class FeatureTrackerParams():
-
         @dataclass
         class OpticalFlowTrackerParams():
             window_size = 15
@@ -67,18 +65,20 @@ class AlgorithmConfig():
         @dataclass()
         class KeyPointDetectorParams():
 
+            # Maximum new corners to detect in detector.
             max_corners = 200
             quality_level = 0.01
+            # A new point must be at least this distance away from another point to be considered valid.
             min_distance = 10.0
+            # The size of the window used to look at to deteremine the sub-pixel location of the keypoint.
             sub_pix_window_size = 10
             sub_pix_zero_zone = -1
 
         lk_params: OpticalFlowTrackerParams = OpticalFlowTrackerParams()
         detector_params: KeyPointDetectorParams = KeyPointDetectorParams()
 
+        # Set this to a value to make the run deterministic. Is used to set the randomness for the RANSAC algorithm.
         numpy_random_seed = None
-        sub_pix_window_size = 5
-        sub_pix_zero_zone = -1
 
         small_angle_threshold = 0.001745329
 
@@ -87,11 +87,17 @@ class AlgorithmConfig():
         ransac_iterations = 300
         ransac_threshold = 1e-4
 
+        # If the number of tracked features falls below this value, then it will try to detect new keypoints.
         min_tracked_features = 200
+
+        # The maximum amount of features we will track.
         max_tracked_features = 200
 
+        # The length and width of a cell within our grid.
         grid_block_size = 100
+        # Maximum keypoints we allow per cell
         max_keypoints_per_block = 10
+        # Within a cell we require a new keypoint to have atleast this much distance from older keypoints.
         min_dist_between_keypoints = 10
 
     @dataclass
@@ -99,18 +105,35 @@ class AlgorithmConfig():
         class StateTransitionIntegrationMethod(Enum):
             """ Enum which contains different ways to compute the state transition matrix.
 
-            The state transition matrix(generally represented as Phi) requires solving an integral.
+            Given a dynamical linear system:
 
-            Depending on the accuracy, and other factors we can use different integration schemes to compute/approximate
-            the state transition matrix.
+                x_dot = A * x
 
+            * x_dot is derivative
+            * A is a matrix representing our linear system transition
+            * x is our state
+
+            By integrating over our time interval we get the following solution.
+
+                x_n+1 = e^(A*delta_t)*x_n
+
+            Where e is the matrix exponent.
+
+            e^(A*delta_t) is typically represented with the symbol Phi, and is called the State transition matrix.
+
+            We can just use the matrix exponential solution, and call it a day, but it can be quite expensive to
+             compute. Thus we may want to use a different integration method to compute/approximate the state
+             transition matrix.
+
+            Note also that in our case since we are using an EKF, instead of A we used a linearized approximation
+             called F.
             Euler:
                 Simplest and quickest. Simply multiply the transition matrix by the time interval.
 
             truncation_3rd_order:
-                truncation is an integration scheme with varying levels of accuracy depending on the order. An overview of
-                this method can be found in "Quaternion kinematics for the error-state Kalman filter" by Joan Sola in
-                Appendix C.
+                truncation is an integration scheme with varying levels of accuracy depending on the order. An overview
+                 of this method can be found in "Quaternion kinematics for the error-state Kalman filter" by Joan Sola
+                 in Appendix C.
 
             matrix_exponent:
 
@@ -121,18 +144,34 @@ class AlgorithmConfig():
             # RK4 = auto()  # Runge Kutta 4
 
         class TransitionMatrixModel(Enum):
+            """ Enum which controls how we choose to model the dynamical system, and therefore what our covariance propogation
+            equations should be.
+
+            We have 2 parts to our propogation equation.
+             1. The state evolution of the dynamical system
+             2. The measurements/inputs which contribute to the state evolution.
+
+            For both cases we must choose how we want to model them(either as discrete or continous)
+            """
             discrete = auto()
             continous_discrete = auto()
 
+        # The maximum number of clones a track can have, before it must be used for an update.
         max_track_length = 20
+
+        # The minimum track length a track must have to justify a MSCKF update with it.
         min_track_length_for_update = 3
 
-        use_observability_constraint = False
+        # use_observability_constraint = False
 
-        keypoint_noise = 0.35
+        # How noisy we believe a keypoint measurement is.
+        keypoint_noise_sigma = 0.35
 
+        # The maximum number of clones we store. Anymore more than this and we start deleting older clones.
         max_clone_num = 20
 
+        # In the EKF update it is sometimes possible to compress the matrices to a smaller size. This is usefull as it
+        # it makes subsequent operations such as computing the Kalman Gain much more efficient.
         use_QR_compression = True
 
         transition_matrix_method = TransitionMatrixModel.discrete

@@ -1,19 +1,21 @@
-
+import os
 from multiprocessing import Process, Queue
 
-from spatial_transformations import hamiltonian_quaternion_to_rot_matrix
-from dataset_utils import csv_read_matrix
 import click
-import os
+
+from dataset_utils import csv_read_matrix
+from spatial_transformations import hamiltonian_quaternion_to_rot_matrix
 from viewer import *
 
 
 @click.command()
-@click.option('--euroc_gt_data_file', required=True,help="Path to the ground truth data file of a Euroc dataset."
-                                                         " Should look like state_groundtruth_estimate0/data.csv ")
+@click.option('--euroc_gt_data_file',
+              required=True,
+              help="Path to the ground truth data file of a Euroc dataset."
+              " Should look like state_groundtruth_estimate0/data.csv ")
 def run_viewer_example(euroc_gt_data_file):
 
-    assert(os.path.exists(euroc_gt_data_file))
+    assert (os.path.exists(euroc_gt_data_file))
     poses = []
     first_pos = None
     ground_truth_data = csv_read_matrix(euroc_gt_data_file)
@@ -41,6 +43,7 @@ def run_viewer_example(euroc_gt_data_file):
     for pose in poses:
         pose_q.put(pose)
         time.sleep(0.01)
+
 
 if __name__ == '__main__':
     run_viewer_example()

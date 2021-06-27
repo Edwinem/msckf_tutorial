@@ -378,6 +378,9 @@ class FeatureTracker():
         self.intrinsics = camera_calibration.intrinsics.generate_K()
         self.dist_coeffs = camera_calibration.intrinsics.dist_coeffs
 
+        # Set the seed for numpys random number generator
+        np.random.seed(params.numpy_random_seed)
+
     def get_current_normalized_keypoints_and_ids(self):
         """Get the normalized keypoints and their associated IDs.
 

@@ -101,6 +101,13 @@ class State():
         return StateInfo.CLONE_START_INDEX + index_within_clones * StateInfo.CLONE_STATE_SIZE
 
     def update_state(self, delta_x):
+        """Update the state vector given a delta_x computed from a measurement update.
+
+        Args:
+            delta_x: Numpy vector. Has length equal to the error state vector.
+
+
+        """
         assert (delta_x.shape[0] == self.get_state_size())
 
         # For everything except for the rotations we can use a simple vector update
@@ -269,7 +276,15 @@ class MSCKF():
         del self.state.clones[oldest_camera_id]
 
     def add_camera_features(self, feature_ids, normalized_keypoints):
+        """
 
+        Args:
+            feature_ids:
+            normalized_keypoints:
+
+        Returns:
+
+        """
         mature_feature_ids = []
         newest_clone_id = self.augment_camera_state(0)
         for id, keypoint in zip(feature_ids, normalized_keypoints):
@@ -294,6 +309,20 @@ class MSCKF():
         self.msckf_update(ids_to_update)
 
     def check_feature_motion(self, id, min_motion_dist=0.05, use_orthogonal_dist=False):
+        """Check if the camera poses observing the feature has sufficient displacement between them.
+
+        Args:
+            id:
+            min_motion_dist:
+            use_orthogonal_dist:
+
+        Returns: True if there is enough movement.
+
+        When triangulating a point we require that there is sufficient movement of the camera, to be able to triangulate
+        it accurately. E.g if the camera just stood in place, there would be no baseline and it would be impossible
+        to estimate the depth correctly.
+
+        """
         track = self.map_id_to_feature_tracks[id]
         if len(track.tracked_keypoints) < 2:
             return False
@@ -327,6 +356,13 @@ class MSCKF():
             return False
 
     def msckf_update(self, ids):
+        """Starts the msckf update process given a list of features.
+
+        Args:
+            ids: List of track ids we want to use for the msckf update.
+
+        The main purpose of this function is to validate the tracks for the measurement update.
+        """
         if len(ids) == 0:
             return
         map_good_track_id_to_triangulated_pt = {}
@@ -486,7 +522,7 @@ class MSCKF():
         return A
 
     def chi_square_test(self, H_o, residual, dof):
-        noise = np.eye(H_o.shape[0]) * self.params.keypoint_noise
+        noise = np.eye(H_o.shape[0]) * self.params.keypoint_noise_sigma**2
         innovation = H_o @ self.state.covariance @ H_o.T + noise
         # gamma = r^T * (H*P*H^T + R)^-1 * r
         # (H*P*H^T + R)^-1 * r = np.linalg.solve((H*P*H^T + R), r)
@@ -559,7 +595,7 @@ class MSCKF():
         final_H = H[0:index]
 
         R = np.zeros((final_r.shape[0], final_r.shape[0]))
-        np.fill_diagonal(R, self.params.keypoint_noise**2)
+        np.fill_diagonal(R, self.params.keypoint_noise_sigma**2)
         self.update_EKF(final_r, final_H, R)
 
     def residualize(self, track):
@@ -672,19 +708,43 @@ class MSCKF():
             self.state.covariance[0:StateInfo.IMU_STATE_SIZE, 0:StateInfo.IMU_STATE_SIZE] = new_cov_symmetric
 
     def update_EKF(self, res, H, R):
+        """
+
+        Args:
+            res:
+            H:
+            R:
+
+        Returns:
+
+        """
         assert (R.shape[0] == res.shape[0])
         assert (H.shape[0] == res.shape[0])
         logger.info("Residual norm is %f", np.linalg.norm(res))
 
         if H.shape[0] > H.shape[1] and self.params.use_QR_compression:
-            # QR decomposition
-            Q1, Q2 = np.linalg.qr(H, mode='reduced')  # if M > N, return (M, N), (N, N)
-            H_thin = Q2  # shape (N, N)
-            r_thin = Q1.T @ res  # shape (N,)
+            # See "A Multi-state Constraint Kalman Filter for Vision-Aided Inertial Navigation" Eq 26-28 and
+            # "An Estimation Algorithm for  Vision-Based Exploration of Small Bodies in Space" Section V Part A.
+            #
+            # The math has to do with some matrix algebra taking advantage of the fact that Q is an orthogonal matrix
+            # and thus its transpose is equal to its inverse. I also advise you to understand what the QR factorization
+            # actually does.
+            #
+            # As for why we do it. Imagine we have 10 features seen in 10 cameras. This results in a matrix with 170
+            # rows(nullspace projection reduces it from 200). It can be compressed to a matrix of state vector size
+            # so in this example it would be 75(IMU state + 6*10 cameras).
+            # The Kalman gain requires matrix inversion which generally is an O(n^3) algorithm. So 75^3<<170^3
+            # is a big computation saving.
+            # Note that I ignore the extra cost of the QR decomposition, but it ends up being worth it.
+
+            # Here RT is the upper triangular matrix
+            Q1, RT = np.linalg.qr(H, mode='reduced')
+            H_thin = RT
+            r_thin = Q1.T @ res
             R_thin = Q1.T @ R @ Q1
         else:
-            H_thin = H  # shape (M, N)
-            r_thin = res  # shape (M)
+            H_thin = H
+            r_thin = res
             R_thin = R
 
         H = H_thin
@@ -703,8 +763,6 @@ class MSCKF():
         # Apply the new covariance and the update
         self.state.covariance = new_cov
         self.state.update_state(delta_x)
-
-        return 0
 
     def augment_camera_state(self, timestamp):
         imu_R_global = self.state.imu_JPLQ_global.rotation_matrix()

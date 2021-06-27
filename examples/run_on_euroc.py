@@ -30,14 +30,25 @@ NANOSECOND_TO_SECOND = 1e-9
 # nanoseconds.
 EUROC_DELTA_TIME = 5000192
 
+levels = {
+    'critical': logging.CRITICAL,
+    'error': logging.ERROR,
+    'warn': logging.WARNING,
+    'warning': logging.WARNING,
+    'info': logging.INFO,
+    'debug': logging.DEBUG
+}
+
 
 @click.command()
-@click.option('--euroc_folder', required=True,help="Path to a folder containing Euroc data.")
-@click.option('--start_timestamp', required=False, help="Timestamp of where we want to start reading data from.")
+@click.option('--euroc_folder', required=True, help="Path to a folder containing Euroc data. Typically called mav0")
+@click.option('--start_timestamp', required=True, help="Timestamp of where we want to start reading data from.")
 @click.option('--use_viewer', is_flag=True, help="Use a 3D viwer to view the camera path")
-def run_on_euroc(euroc_folder, start_timestamp, use_viewer):
+@click.option('--log_level', required=False, default="debug", help="Level of python logging messages")
+def run_on_euroc(euroc_folder, start_timestamp, use_viewer, log_level):
 
-    logging.basicConfig(format='%(filename)s: %(message)s', level=logging.DEBUG)
+    level = levels.get(log_level.lower())
+    logging.basicConfig(format='%(filename)s: %(message)s', level=level)
 
     euroc_calib = EurocDatasetCalibrationParams()
     camera_calib = CameraCalibration()

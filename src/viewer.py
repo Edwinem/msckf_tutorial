@@ -102,7 +102,6 @@ def create_window(config_cls: moderngl_window.WindowConfig, config=ViewerConfig(
         An instantiated object of the class 'config_cls'
     """
 
-
     moderngl_window.setup_basic_logging(config_cls.log_level)
     window_cls = moderngl_window.get_local_window_cls(config.window_type)
 
@@ -148,7 +147,7 @@ def run_viewer_loop(window):
     window.destroy()
 
 
-def create_and_run(est_pose_queue, gt_pose_queue=None,viewer_config = ViewerConfig()):
+def create_and_run(est_pose_queue, gt_pose_queue=None, viewer_config=ViewerConfig()):
     """Creates the Viewer and starts the run loop.
 
     Args:
@@ -176,7 +175,7 @@ def create_and_run(est_pose_queue, gt_pose_queue=None,viewer_config = ViewerConf
 
 
     """
-    window = create_window(SLAMViewer,viewer_config)
+    window = create_window(SLAMViewer, viewer_config)
     window.config.pose_queue = est_pose_queue
     window.config.gt_pose_queue = gt_pose_queue
     run_viewer_loop(window)
