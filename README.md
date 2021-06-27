@@ -3,7 +3,7 @@
 ## Introduction
 This project contains a basic Multi-Constraint Kalman Filter(MSCKF) implementation to solve the
 visual inertial odometry(VIO) problem. The MSCKF is an extended kalman filter first introduced in
-X, and is the main way to solve VIO within the EKF framework.
+["A Multi-State Constraint Kalman Filter for Vision-aided Inertial Navigation" by Mourikis and Roumeliotis](https://www-users.cs.umn.edu/~stergios/papers/ICRA07-MSCKF.pdf), and is the main way to solve VIO within the EKF framework.
 
 This project should serve as a tutorial. Hopefully, people can read through the codebase
 and learn how an MSCKF works. It is a fairly basic implementation, and lacks some of the more modern upgrades such as
@@ -45,7 +45,7 @@ This assumes you already have a basic understanding of rotations, and transforms
 
 ### Basic homogenous transforms.
 
-![Coordinate Systems](docs/drawio_diagrams/images/Coordinate_systems-3_coordinate_systems.png "Two Coordinate Systems")
+![Coordinate Systems](docs/drawio_diagrams/images/Coordinate_systems-3_coordinate_systems.png "Three Coordinate Systems")
 
 In the above image you can see 3 coordinate system which we will call Frame **A** and Frame **B** and **O**(for origin).
 They are related to each other by a rigid body transform(![formula](https://render.githubusercontent.com/render/math?math=T)). Which is composed of a rotation 
@@ -106,19 +106,19 @@ objects are even allowed to be composed together.
 Lets imagine we have a point in the camera frame which we want to transform into the IMU
 frame. In code this would look like so:
 
-```pt_in_imu=imu_T_camera * pt_in_camera```
+```pt_in_imu = imu_T_camera * pt_in_camera```
 
 here we can see that this is valid as the ```camera``` parts of the names connect.
 
 An invalid example would be:
 
-```pt_in_imu=camera_T_Imu * pt_in_camera```
+```pt_in_imu = camera_T_Imu * pt_in_camera```
 
 Here we have a ```pt_in_camera``` connecting with an ```imu``` so we know we have a problem.
 
 Note that this also works with almost all of the transform objects.
 
-```global_T_camera=global_T_imu * imu_T_camera```
+```global_T_camera = global_T_imu * imu_T_camera```
 
 Here is a table of all the transformation quantities you can find in the codebase.
 
@@ -140,6 +140,24 @@ of the jpl style quaternions, and that they store the rotation in the opposite d
 #### JPL style Quaternions.
 
 #### Storage of rotation.
+![Frames with landmark](docs/drawio_diagrams/images/Coordinate_systems-2_coordinate_systems_with_landmark.png " Estimated Frame with Landmark")
+
+In VIO we are trying to estimate the pose of the IMU frame in some global coordinate system. 
+
+In most cases the exact transform we are trying to estimate can be written as ![formula](https://render.githubusercontent.com/render/math?math=T_I^G).
+It is possible to store it as a homogenous transform, but generally we store the rotation and translation
+separately as a pair ![formula](https://render.githubusercontent.com/render/math?math=[R_I^G,t_I^G]). We also generally use
+quaternions as our rotation representation so it should look like so ![formula](https://render.githubusercontent.com/render/math?math=[{}_hq_I^G,t_I^G]) where ![formula](https://render.githubusercontent.com/render/math?math={}_hq) marks it
+as a hamiltonian quaternion.  This is equivalent to the homogenous matrix
+![formula](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Bbmatrix%7DR_I^G%20%26%20t_I^G%5C%5C%200_3%20%26%201%5Cend%7Bbmatrix%7D).
+
+##### MSCKF Style
+The MSCKF stores the inverted rotation matrix of our above format. So instead of the pair ![formula](https://render.githubusercontent.com/render/math?math=[R_I^G,t_I^G])
+it instead stores ![formula](https://render.githubusercontent.com/render/math?math=[R_G^I,t_I^G]) where ![formula](https://render.githubusercontent.com/render/math?math=[R_G^I]) is the rotation
+of the global frame in the IMU frame. In addition it uses a JPL style quaternion to represent the rotation ![formula](https://render.githubusercontent.com/render/math?math=[{}_{j}q_G^I,t_I^G]).
+This means our pair is no longer equivalent to the standard homogenous matrix, and is instead equal to
+![formula](https://render.githubusercontent.com/render/math?math=%5Cbegin%7Bbmatrix%7DR_G^I%20%26%20-R_G^It_I^G%5C%5C%200_3%20%26%201%5Cend%7Bbmatrix%7D).
+
 
 
 

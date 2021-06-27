@@ -127,6 +127,7 @@ class AlgorithmConfig():
 
             Note also that in our case since we are using an EKF, instead of A we used a linearized approximation
              called F.
+
             Euler:
                 Simplest and quickest. Simply multiply the transition matrix by the time interval.
 
@@ -141,7 +142,6 @@ class AlgorithmConfig():
             Euler = auto()
             truncation_3rd_order = auto()  # Euler integration
             matrix_exponent = auto()  # Matrix exponential
-            # RK4 = auto()  # Runge Kutta 4
 
         class TransitionMatrixModel(Enum):
             """ Enum which controls how we choose to model the dynamical system, and therefore what our covariance propogation
@@ -170,7 +170,7 @@ class AlgorithmConfig():
         # The maximum number of clones we store. Anymore more than this and we start deleting older clones.
         max_clone_num = 20
 
-        # In the EKF update it is sometimes possible to compress the matrices to a smaller size. This is usefull as it
+        # In the EKF update it is sometimes possible to compress the matrices to a smaller size. This is useful as it
         # it makes subsequent operations such as computing the Kalman Gain much more efficient.
         use_QR_compression = True
 
