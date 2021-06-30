@@ -8,7 +8,7 @@ visual inertial odometry(VIO) problem. The MSCKF is an extended kalman filter fi
 This project should serve as a tutorial. Hopefully, people can read through the codebase
 and learn how an MSCKF works. It is a fairly basic implementation, and lacks some of the more modern upgrades such as
 the observability constraints. Plus as it is implemented in Python it lacks the speed necessary to run
-this on a actual system. If you do want a useful ,performant MSCKF solution then I recommend
+this on a actual system. If you do want a useful, performant MSCKF solution then I recommend
 the [OpenVINS](https://github.com/rpng/open_vins) project.
 
 ## Getting Started
@@ -17,9 +17,14 @@ the [OpenVINS](https://github.com/rpng/open_vins) project.
 The project is developed with [poetry](https://python-poetry.org/docs/basic-usage/) to control the dependencies.
 If possible I recommend to setup the project using it, and run the commands with it.
 
+#### Poetry setup
+
+Activate your poetry environment and run ```poetry install``` in the ```msckf_tutorial``` folder. You can now run
+the examples by prepending your commands with ```poetry run```.
+
 #### Python Virtual environment setup.
 
-It is assumed you already have setup or can setup a python virtual environment.
+It is assumed you already have setup, or can setup a python virtual environment.
 
 Install the project to your virtualenv. I recommend using
 ```pip install -e .```.
@@ -37,6 +42,11 @@ The ```start_timestamp``` is needed right now as we don't run an initialization 
 some drastic movement in the beginning to initialize the system. It should be set to timestamp where
 the drone is about to take off after the bias initialization movement. Here the value ```1403636896901666560``` is for
 the MH02 run.
+
+If you add the ```--use_viewer``` option a window should pop up which draws the current camera pose and the trajectories.
+Green is the ground truth, and red is the estimated one. You can control the movement of the camera with ```WASD``` keys.
+
+![SLAM Viewer](docs/images/SLAM_Viewer.png "SLAM Viewer GUI")
 
 
 ## Primer on Transforms and Notation
@@ -81,7 +91,7 @@ is then just a pair of the quaternion and rotation, and is equivalent to the hom
 All the operations discussed above with homogenous transform are possible with the quaternion 
 translation pair. You just have to change certain matrix operations to their quaternion equivalent.
 
-For an actual tutorial on Quaternions I recommend For an in depth tutorial on Quaternions I recommend the paper [Quaternion kinematics for the error-state Kalman filter by Joan Solà](https://arxiv.org/abs/1711.02508), which
+For an in depth tutorial on Quaternions I recommend the paper [Quaternion kinematics for the error-state Kalman filter by Joan Solà](https://arxiv.org/abs/1711.02508), which
 also discusses how to implement the operations.
 
 ### Notation in code
@@ -93,30 +103,33 @@ In the code the notation is as follows.
 
 Frames 1,2 can be changed to the actual name of coordinate frames(e.g camera,imu,body,world,...)
 ```X``` represents some sort of transformation object(e.g T for Transform, R for rotation, t for translation,...)
+It stands for the transform object that transforms Frame 1 into Frame 2.
 
-An example transform is:
+An example would be:
 
 ![formula](https://render.githubusercontent.com/render/math?math=T_C^I)
 
 ```imu_T_camera```
 
+The transform of the **camera** in the **imu** frame.
+
 The advantage of this notation is that it allows you to check if two transform
 objects are even allowed to be composed together.
 
-Lets imagine we have a point in the camera frame which we want to transform into the IMU
+Let's imagine we have a point in the **camera** frame which we want to transform into the **imu**
 frame. In code this would look like so:
 
 ```pt_in_imu = imu_T_camera * pt_in_camera```
 
-here we can see that this is valid as the ```camera``` parts of the names connect.
+here we can see that this is valid as the ```camera``` parts of the names are adjacent.
 
 An invalid example would be:
 
 ```pt_in_imu = camera_T_Imu * pt_in_camera```
 
-Here we have a ```pt_in_camera``` connecting with an ```imu``` so we know we have a problem.
+Here we have a ```pt_in_camera``` adjacent to ```imu``` so we know we have a problem.
 
-Note that this also works with almost all of the transform objects.
+Note that this also works with almost all the transform objects.
 
 ```global_T_camera = global_T_imu * imu_T_camera```
 
@@ -133,7 +146,7 @@ Here is a table of all the transformation quantities you can find in the codebas
 
 ### MSCKF differences
 
-In most literature and in this project you will find that the MSCKF works a little bit
+In most literature and in this project you will find that the MSCKF works
 differently in how it handles rigid body transforms. The most significant being the use
 of the jpl style quaternions, and that they store the rotation in the opposite direction compared to most people.
 
