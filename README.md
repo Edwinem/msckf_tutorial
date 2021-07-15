@@ -102,7 +102,7 @@ In the code the notation is as follows.
 
 
 Frames 1,2 can be changed to the actual name of coordinate frames(e.g camera,imu,body,world,...)
-```X``` represents some sort of transformation object(e.g T for Transform, R for rotation, t for translation,...)
+```X``` represents some sort of transformation object(e.g T for Transform, R for rotation, t for translation,...).
 It stands for the transform object that transforms Frame 1 into Frame 2.
 
 An example would be:
@@ -111,7 +111,7 @@ An example would be:
 
 ```imu_T_camera```
 
-The transform of the **camera** in the **imu** frame.
+The transform of the **imu** frame to the **camera** frame.
 
 The advantage of this notation is that it allows you to check if two transform
 objects are even allowed to be composed together.
@@ -176,3 +176,17 @@ This means our pair is no longer equivalent to the standard homogenous matrix, a
 
 
 ## References
+
+```txt
+A. I. Mourikis and S. I. Roumeliotis, "A Multi-State Constraint Kalman Filter for Vision-aided Inertial Navigation," Proceedings 2007 IEEE International Conference on Robotics and Automation, 2007, pp. 3565-3572, doi: 10.1109/ROBOT.2007.364024.
+
+A. I. Mourikis and S. I. Roumeliotis, "A Multi-State Constraint Kalman Filter for Vision-aided Inertial Navigation," University  of  Minnesota,  Dept.  of  Comp.  Sci.& Eng., Tech. Rep
+
+N.  Trawny  and  S.  I.  Roumeliotis,  “Indirect  Kalman  filter  for  3D attitude  estimation,”  University  of  Minnesota,  Dept.  of  Comp.  Sci.& Eng., Tech. Rep., Mar. 2005
+
+Joan Solà "Quaternion kinematics for the error-state Kalman filter" https://arxiv.org/abs/1711.02508
+
+Frank L. Lewis, Lihua Xie, Dan Popa " Optimal and Robust Estimation With an Introduction to Stochastic Control Theory Second Edition"
+
+Richard Hartley, Andrew Zisserman "Multiple View Geometry in Computer Vision"
+```
