@@ -1,0 +1,4 @@
+[console_scripts]
+format = scripts.scripts:format
+generate_setup_py = scripts.scripts:generate_setup_py
+
